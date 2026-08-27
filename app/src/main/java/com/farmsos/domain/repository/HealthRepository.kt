@@ -1,0 +1,3 @@
+package com.farmsos.domain.repository
+import com.farmsos.domain.model.*
+interface HealthRepository { suspend fun medicines(farmId:String):Result<List<Medicine>>; suspend fun vaccines(farmId:String):Result<List<Vaccine>>; suspend fun reminders(farmId:String):Result<List<VaccinationReminder>>; suspend fun expiryAlerts(farmId:String):Result<List<MedicineExpiryAlert>>; suspend fun addMedicine(value:Medicine):Result<Medicine>; suspend fun purchaseMedicine(value:MedicinePurchase):Result<Unit>; suspend fun useMedicine(value:MedicineUsage):Result<Unit>; suspend fun addVaccine(value:Vaccine):Result<Vaccine>; suspend fun saveSchedule(value:VaccinationSchedule):Result<VaccinationSchedule>; suspend fun recordVaccination(value:VaccinationRecord):Result<Unit> }

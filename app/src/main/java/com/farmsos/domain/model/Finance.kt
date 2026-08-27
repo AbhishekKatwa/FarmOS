@@ -1,0 +1,5 @@
+package com.farmsos.domain.model
+data class ExpenseCategory(val id:String,val farmId:String?,val name:String,val active:Boolean=true)
+data class Expense(val id:String="",val farmId:String,val flockId:String?=null,val date:String,val categoryId:String,val amount:Double,val vendor:String="",val paymentMethod:String="",val reference:String="",val notes:String="",val attachmentPath:String="")
+data class DailyFinancialSummary(val farmId:String,val flockId:String?,val date:String,val revenue:Double,val feedCost:Double,val medicineCost:Double,val labourCost:Double,val transportCost:Double,val otherExpenses:Double,val grossProfit:Double,val netProfit:Double,val eggs:Int,val trays:Double,val averageLiveBirds:Double){val profitPerBird get()=averageLiveBirds.takeIf{it>0}?.let{netProfit/it};val profitPerEgg get()=eggs.takeIf{it>0}?.let{netProfit/it};val profitPerTray get()=trays.takeIf{it>0}?.let{netProfit/it};val costPerEgg get()=eggs.takeIf{it>0}?.let{(feedCost+medicineCost+labourCost+transportCost+otherExpenses)/it};val breakEvenEggPrice get()=costPerEgg}
+enum class FinancialPlanType { BUDGET, FORECAST, SIMULATION }

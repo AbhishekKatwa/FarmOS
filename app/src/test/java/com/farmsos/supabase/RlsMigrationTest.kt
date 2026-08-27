@@ -89,6 +89,45 @@ class RlsMigrationTest {
         assertTrue(sql.contains("feed_consumption_members"))
     }
 
+    @Test
+    fun medicineAndVaccinationTablesHaveMemberScopedRls() {
+        assertTrue(sql.contains("CREATE TABLE public.medicines"))
+        assertTrue(sql.contains("CREATE TABLE public.medicine_purchases"))
+        assertTrue(sql.contains("CREATE TABLE public.medicine_usage"))
+        assertTrue(sql.contains("CREATE TABLE public.vaccines"))
+        assertTrue(sql.contains("CREATE TABLE public.vaccination_schedules"))
+        assertTrue(sql.contains("CREATE TABLE public.vaccination_records"))
+        assertTrue(sql.contains("upcoming_vaccination_reminders"))
+        assertTrue(sql.contains("medicine_expiry_alerts"))
+        assertTrue(sql.contains("medicine_usage_select_members"))
+        assertTrue(sql.contains("vaccination_records_select_members"))
+    }
+
+    @Test
+    fun buyerDispatchLedgerUsesTransactionsAndProtectsSaleableEggs() {
+        assertTrue(sql.contains("CREATE TABLE public.buyers"))
+        assertTrue(sql.contains("CREATE TABLE public.dispatches"))
+        assertTrue(sql.contains("CREATE TABLE public.dispatch_items"))
+        assertTrue(sql.contains("CREATE TABLE public.buyer_ledger"))
+        assertTrue(sql.contains("CREATE TABLE public.buyer_payments"))
+        assertTrue(sql.contains("Dispatch exceeds available saleable eggs"))
+        assertTrue(sql.contains("Only an owner may authorize an oversell"))
+        assertTrue(sql.contains("buyer_outstanding_aging"))
+        assertTrue(sql.contains("buyer_ledger_members"))
+    }
+
+    @Test
+    fun financeKeepsActualsSeparateFromPlans() {
+        assertTrue(sql.contains("CREATE TABLE public.expense_categories"))
+        assertTrue(sql.contains("CREATE TABLE public.expenses"))
+        assertTrue(sql.contains("CREATE TABLE public.financial_transactions"))
+        assertTrue(sql.contains("CREATE TABLE public.daily_financial_summary"))
+        assertTrue(sql.contains("CREATE TABLE public.financial_plan_entries"))
+        assertTrue(sql.contains("plan_type IN ('BUDGET','FORECAST','SIMULATION')"))
+        assertTrue(sql.contains("source_type='DISPATCH' AND transaction_type='REVENUE'"))
+        assertTrue(sql.contains("transactions_members"))
+    }
+
     private fun loadMigrations(): String {
         val candidates = listOf(
             File("supabase/migrations"),
