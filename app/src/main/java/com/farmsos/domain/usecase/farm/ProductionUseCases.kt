@@ -9,6 +9,7 @@ import java.util.Locale
 import javax.inject.Inject
 
 class ListEggGradesUseCase @Inject constructor(private val repository: ProductionRepository) { suspend operator fun invoke() = repository.listGrades() }
+class ObserveProductionUseCase @Inject constructor(private val repository: ProductionRepository) { operator fun invoke(flockId: String) = repository.observeByFlock(flockId) }
 class ListProductionUseCase @Inject constructor(private val repository: ProductionRepository) { suspend operator fun invoke(flockId: String) = repository.listByFlock(flockId) }
 class GetProductionUseCase @Inject constructor(private val repository: ProductionRepository) { suspend operator fun invoke(id: String) = repository.get(id) }
 class CreateProductionUseCase @Inject constructor(private val flocks: FlockRepository, private val repository: ProductionRepository) {

@@ -1,5 +1,9 @@
 package com.farmsos.domain.model
 
+import androidx.room.Entity
+import androidx.room.PrimaryKey
+import java.util.UUID
+
 data class EggGrade(
     val id: String,
     val code: String,
@@ -8,9 +12,17 @@ data class EggGrade(
     val sortOrder: Int
 )
 
-data class EggGradeEntry(val eggGradeId: String, val quantity: Int)
+@Entity(tableName = "egg_grade_entries")
+data class EggGradeEntry(
+    @PrimaryKey(autoGenerate = true) val localEntryId: Int = 0,
+    val productionDailyLocalId: String,
+    val eggGradeId: String,
+    val quantity: Int
+)
 
+@Entity(tableName = "mortality_records")
 data class MortalityRecord(
+    @PrimaryKey override val localId: String = "",
     val id: String = "",
     val productionDailyId: String = "",
     val farmId: String,
@@ -18,10 +30,19 @@ data class MortalityRecord(
     val date: String,
     val mortalityCount: Int,
     val cause: String = "",
-    val remarks: String = ""
-)
+    val remarks: String = "",
+    override val serverId: String? = null,
+    override val syncStatus: SyncStatus = SyncStatus.PENDING,
+    override val syncAttempts: Int = 0,
+    override val lastSyncError: String? = null,
+    override val idempotencyKey: String = "",
+    override val createdAt: Long = 0,
+    override val updatedAt: Long = 0
+) : Syncable
 
+@Entity(tableName = "production_daily")
 data class DailyProduction(
+    @PrimaryKey override val localId: String = "",
     val id: String = "",
     val farmId: String,
     val shedId: String,
@@ -30,7 +51,7 @@ data class DailyProduction(
     val openingLiveBirds: Int,
     val mortality: Int,
     val culls: Int,
-    val closingLiveBirds: Int = openingLiveBirds - mortality - culls,
+    val closingLiveBirds: Int,
     val eggsCollected: Int,
     val brokenEggs: Int,
     val dirtyEggs: Int,
@@ -39,9 +60,20 @@ data class DailyProduction(
     val feedConsumedKg: Double,
     val remarks: String = "",
     val enteredBy: String = "",
-    val eggGrades: List<EggGradeEntry> = emptyList(),
-    val mortalityRecord: MortalityRecord? = null
-)
+    override val serverId: String? = null,
+    override val syncStatus: SyncStatus = SyncStatus.PENDING,
+    override val syncAttempts: Int = 0,
+    override val lastSyncError: String? = null,
+    override val idempotencyKey: String = "",
+    override val createdAt: Long = 0,
+    override val updatedAt: Long = 0
+) : Syncable {
+    @androidx.room.Ignore
+    var eggGrades: List<EggGradeEntry> = emptyList()
+
+    @androidx.room.Ignore
+    var mortalityRecord: MortalityRecord? = null
+}
 
 data class ProductionMetrics(
     val averageLiveBirds: Double,

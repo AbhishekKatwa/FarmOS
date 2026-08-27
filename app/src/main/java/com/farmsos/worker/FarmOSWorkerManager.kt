@@ -14,11 +14,21 @@ import dagger.assisted.AssistedInject
 @HiltWorker
 class FarmOSWorkerManager @AssistedInject constructor(
     @Assisted private val context: Context,
-    @Assisted private val workerParams: WorkerParameters
+    @Assisted private val workerParams: WorkerParameters,
+    private val productionRepository: com.farmsos.domain.repository.ProductionRepository,
+    private val feedRepository: com.farmsos.domain.repository.FeedRepository,
+    private val salesRepository: com.farmsos.domain.repository.SalesRepository
 ) : CoroutineWorker(context, workerParams) {
 
     override suspend fun doWork(): Result {
-        // TODO: Implement background sync logic
-        return Result.success()
+        val productionResult = productionRepository.syncPending()
+        val feedResult = feedRepository.syncPending()
+        val salesResult = salesRepository.syncPending()
+
+        return if (productionResult.isSuccess && feedResult.isSuccess && salesResult.isSuccess) {
+            Result.success()
+        } else {
+            Result.retry()
+        }
     }
 }

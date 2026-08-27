@@ -1,10 +1,71 @@
 package com.farmsos.domain.model
 
+import androidx.room.Entity
+import androidx.room.PrimaryKey
+import java.util.UUID
+
 enum class FeedType { LAYER_FEED, PRE_LAYER, STARTER, GROWER, CUSTOM_FEED }
 data class FeedItem(val id: String = "", val farmId: String, val name: String, val feedType: FeedType, val unit: String = "kg", val openingQuantityKg: Double = 0.0, val openingCostPerKg: Double? = null, val openingDate: String = "", val isActive: Boolean = true)
-data class FeedPurchase(val id: String = "", val feedItemId: String, val farmId: String, val supplier: String, val quantityKg: Double, val unit: String, val pricePerKg: Double, val batch: String, val purchaseDate: String, val expiryDate: String? = null, val remarks: String = "")
-data class FeedConsumption(val id: String = "", val feedItemId: String, val farmId: String, val flockId: String? = null, val quantityKg: Double, val consumedDate: String, val remarks: String = "")
-data class FeedAdjustment(val id: String = "", val feedItemId: String, val farmId: String, val quantityKg: Double, val adjustmentDate: String, val reason: String, val allowNegativeStock: Boolean = false)
+@Entity(tableName = "feed_purchases")
+data class FeedPurchase(
+    @PrimaryKey override val localId: String = "",
+    val id: String = "",
+    val feedItemId: String,
+    val farmId: String,
+    val supplier: String,
+    val quantityKg: Double,
+    val unit: String,
+    val pricePerKg: Double,
+    val batch: String,
+    val purchaseDate: String,
+    val expiryDate: String? = null,
+    val remarks: String = "",
+    override val serverId: String? = null,
+    override val syncStatus: SyncStatus = SyncStatus.PENDING,
+    override val syncAttempts: Int = 0,
+    override val lastSyncError: String? = null,
+    override val idempotencyKey: String = "",
+    override val createdAt: Long = 0,
+    override val updatedAt: Long = 0
+) : Syncable
+
+@Entity(tableName = "feed_consumption")
+data class FeedConsumption(
+    @PrimaryKey override val localId: String = "",
+    val id: String = "",
+    val feedItemId: String,
+    val farmId: String,
+    val flockId: String? = null,
+    val quantityKg: Double,
+    val consumedDate: String,
+    val remarks: String = "",
+    override val serverId: String? = null,
+    override val syncStatus: SyncStatus = SyncStatus.PENDING,
+    override val syncAttempts: Int = 0,
+    override val lastSyncError: String? = null,
+    override val idempotencyKey: String = "",
+    override val createdAt: Long = 0,
+    override val updatedAt: Long = 0
+) : Syncable
+
+@Entity(tableName = "feed_adjustments")
+data class FeedAdjustment(
+    @PrimaryKey override val localId: String = "",
+    val id: String = "",
+    val feedItemId: String,
+    val farmId: String,
+    val quantityKg: Double,
+    val adjustmentDate: String,
+    val reason: String,
+    val allowNegativeStock: Boolean = false,
+    override val serverId: String? = null,
+    override val syncStatus: SyncStatus = SyncStatus.PENDING,
+    override val syncAttempts: Int = 0,
+    override val lastSyncError: String? = null,
+    override val idempotencyKey: String = "",
+    override val createdAt: Long = 0,
+    override val updatedAt: Long = 0
+) : Syncable
 data class FeedStock(val feedItemId: String, val quantityKg: Double, val averageCostPerKg: Double?)
 data class FeedCostMetrics(val costPerKg: Double?, val costPerBirdDay: Double?, val costPerEgg: Double?, val costPerTray: Double?)
 object FeedCalculator {

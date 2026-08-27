@@ -6,8 +6,12 @@ import org.junit.Test
 
 class ProductionCalculatorTest {
     private fun production(opening: Int = 100, mortality: Int = 4, culls: Int = 6, eggs: Int = 90, feed: Double = 12.0) = DailyProduction(
+        localId = "local",
         farmId = "farm", shedId = "shed", flockId = "flock", date = "2026-08-27", openingLiveBirds = opening,
-        mortality = mortality, culls = culls, eggsCollected = eggs, brokenEggs = 0, dirtyEggs = 0, usableEggs = eggs, rejectedEggs = 0, feedConsumedKg = feed
+        mortality = mortality, culls = culls,
+        closingLiveBirds = opening - mortality - culls,
+        eggsCollected = eggs, brokenEggs = 0, dirtyEggs = 0, usableEggs = eggs, rejectedEggs = 0, feedConsumedKg = feed,
+        idempotencyKey = "key", createdAt = 0, updatedAt = 0
     )
 
     @Test fun calculatesClosingAndMetricsFromAverageLiveBirds() {

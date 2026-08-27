@@ -11,7 +11,9 @@ import kotlinx.serialization.Serializable
     @SerialName("eggs_collected") val eggsCollected: Int = 0, @SerialName("broken_eggs") val brokenEggs: Int = 0,
     @SerialName("dirty_eggs") val dirtyEggs: Int = 0, @SerialName("usable_eggs") val usableEggs: Int = 0,
     @SerialName("rejected_eggs") val rejectedEggs: Int = 0, @SerialName("feed_consumed_kg") val feedConsumedKg: Double = 0.0,
-    val remarks: String = "", @SerialName("entered_by") val enteredBy: String? = null
+    val remarks: String = "", @SerialName("entered_by") val enteredBy: String? = null,
+    @SerialName("idempotency_key") val idempotencyKey: String? = null,
+    @SerialName("updated_at") val updatedAt: Long? = null
 )
 @Serializable data class DailyProductionWriteDto(
     @SerialName("farm_id") val farmId: String, @SerialName("shed_id") val shedId: String,
@@ -19,7 +21,9 @@ import kotlinx.serialization.Serializable
     val mortality: Int, val culls: Int, @SerialName("eggs_collected") val eggsCollected: Int,
     @SerialName("broken_eggs") val brokenEggs: Int, @SerialName("dirty_eggs") val dirtyEggs: Int,
     @SerialName("usable_eggs") val usableEggs: Int, @SerialName("rejected_eggs") val rejectedEggs: Int,
-    @SerialName("feed_consumed_kg") val feedConsumedKg: Double, val remarks: String
+    @SerialName("feed_consumed_kg") val feedConsumedKg: Double, val remarks: String,
+    @SerialName("idempotency_key") val idempotencyKey: String,
+    @SerialName("updated_at") val updatedAt: Long
 )
-@Serializable data class EggGradeEntryDto(@SerialName("production_daily_id") val productionDailyId: String, @SerialName("egg_grade_id") val eggGradeId: String, val quantity: Int)
-@Serializable data class MortalityRecordDto(val id: String? = null, @SerialName("production_daily_id") val productionDailyId: String, @SerialName("farm_id") val farmId: String, @SerialName("flock_id") val flockId: String, val date: String, @SerialName("mortality_count") val mortalityCount: Int, val cause: String = "", val remarks: String = "")
+@Serializable data class EggGradeEntryDto(@SerialName("production_daily_id") val productionDailyId: String, @SerialName("egg_grade_id") val eggGradeId: String, val quantity: Int, @SerialName("idempotency_key") val idempotencyKey: String? = null)
+@Serializable data class MortalityRecordDto(val id: String? = null, @SerialName("production_daily_id") val productionDailyId: String, @SerialName("farm_id") val farmId: String, @SerialName("flock_id") val flockId: String, val date: String, @SerialName("mortality_count") val mortalityCount: Int, val cause: String = "", val remarks: String = "", @SerialName("idempotency_key") val idempotencyKey: String? = null, @SerialName("updated_at") val updatedAt: Long? = null)

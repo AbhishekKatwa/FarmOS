@@ -7,6 +7,7 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -19,6 +20,7 @@ import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 import java.text.SimpleDateFormat
 import java.util.*
+import java.util.UUID
 import javax.inject.Inject
 
 data class FeedUiState(
@@ -71,6 +73,7 @@ class FeedViewModel @Inject constructor(state: SavedStateHandle, private val rep
         viewModelScope.launch {
             repo.addPurchase(
                 FeedPurchase(
+                    localId = UUID.randomUUID().toString(),
                     feedItemId = item.id,
                     farmId = farmId,
                     supplier = supplier,
@@ -78,7 +81,10 @@ class FeedViewModel @Inject constructor(state: SavedStateHandle, private val rep
                     unit = item.unit,
                     pricePerKg = price,
                     batch = "",
-                    purchaseDate = today()
+                    purchaseDate = today(),
+                    idempotencyKey = generateIdempotencyKey(),
+                    createdAt = System.currentTimeMillis(),
+                    updatedAt = System.currentTimeMillis()
                 )
             ).onSuccess { refresh() }
                 .onFailure { _state.update { s -> s.copy(error = it.message) } }
@@ -88,10 +94,14 @@ class FeedViewModel @Inject constructor(state: SavedStateHandle, private val rep
         viewModelScope.launch {
             repo.addConsumption(
                 FeedConsumption(
+                    localId = UUID.randomUUID().toString(),
                     feedItemId = item.id,
                     farmId = farmId,
                     quantityKg = q,
-                    consumedDate = today()
+                    consumedDate = today(),
+                    idempotencyKey = generateIdempotencyKey(),
+                    createdAt = System.currentTimeMillis(),
+                    updatedAt = System.currentTimeMillis()
                 )
             ).onSuccess { refresh() }
                 .onFailure { _state.update { s -> s.copy(error = it.message) } }
@@ -107,7 +117,11 @@ fun FeedInventoryScreen(nav: NavController, vm: FeedViewModel = hiltViewModel())
     var add by remember { mutableStateOf(false) };
     var selected by remember { mutableStateOf<FeedItem?>(null) }; Scaffold(topBar = {
         TopAppBar(
-            title = { Text("Feed inventory") },
+            title = {
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Text("Feed inventory")
+                }
+            },
             navigationIcon = { TextButton({ nav.popBackStack() }) { Text("Back") } },
             actions = { TextButton({ add = true }) { Text("Feed item") } })
     }) { p ->

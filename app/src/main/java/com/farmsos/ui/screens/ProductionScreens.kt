@@ -6,12 +6,14 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
 import com.farmsos.domain.model.*
+import com.farmsos.ui.components.SyncStatusIndicator
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
@@ -24,7 +26,25 @@ import java.util.Locale
             state.error?.let { Text(it, color = MaterialTheme.colorScheme.error) }
             if (state.loading) CircularProgressIndicator()
             if (!state.loading && state.productions.isEmpty()) Text("No daily production has been recorded for this flock.")
-            state.productions.forEach { production -> Card(Modifier.fillMaxWidth().clickable { navController.navigate("farm/${production.farmId}/flock/${production.flockId}/production/${production.id}") }) { Column(Modifier.padding(16.dp)) { Text(production.date, style = MaterialTheme.typography.titleMedium); Text("Eggs ${production.eggsCollected} · Closing birds ${production.closingLiveBirds}") } } }
+            state.productions.forEach { production ->
+                Card(
+                    Modifier
+                        .fillMaxWidth()
+                        .clickable { navController.navigate("farm/${production.farmId}/flock/${production.flockId}/production/${production.id}") }
+                ) {
+                    Column(Modifier.padding(16.dp)) {
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.SpaceBetween,
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Text(production.date, style = MaterialTheme.typography.titleMedium)
+                            SyncStatusIndicator(status = production.syncStatus)
+                        }
+                        Text("Eggs ${production.eggsCollected} · Closing birds ${production.closingLiveBirds}")
+                    }
+                }
+            }
         }
     }
 }
@@ -48,7 +68,29 @@ import java.util.Locale
     var eggs by remember(existing?.id) { mutableStateOf(existing?.eggsCollected?.toString() ?: "0") }; var broken by remember(existing?.id) { mutableStateOf(existing?.brokenEggs?.toString() ?: "0") }; var dirty by remember(existing?.id) { mutableStateOf(existing?.dirtyEggs?.toString() ?: "0") }; var usable by remember(existing?.id) { mutableStateOf(existing?.usableEggs?.toString() ?: "0") }; var rejected by remember(existing?.id) { mutableStateOf(existing?.rejectedEggs?.toString() ?: "0") }; var feed by remember(existing?.id) { mutableStateOf(existing?.feedConsumedKg?.toString() ?: "0") }; var remarks by remember(existing?.id) { mutableStateOf(existing?.remarks ?: "") }
     var cause by remember(existing?.id) { mutableStateOf(existing?.mortalityRecord?.cause ?: "") }; var mortalityRemarks by remember(existing?.id) { mutableStateOf(existing?.mortalityRecord?.remarks ?: "") }
     val gradeValues = remember(state.grades, existing?.id) { mutableStateMapOf<String, String>().apply { state.grades.forEach { grade -> put(grade.id, existing?.eggGrades?.firstOrNull { it.eggGradeId == grade.id }?.quantity?.toString() ?: "0") } } }
-    val draft = DailyProduction(farmId = state.flock?.farmId.orEmpty(), shedId = state.flock?.shedId.orEmpty(), flockId = state.flock?.id.orEmpty(), date = date, openingLiveBirds = opening.toIntOrNull() ?: 0, mortality = mortality.toIntOrNull() ?: 0, culls = culls.toIntOrNull() ?: 0, eggsCollected = eggs.toIntOrNull() ?: 0, brokenEggs = broken.toIntOrNull() ?: 0, dirtyEggs = dirty.toIntOrNull() ?: 0, usableEggs = usable.toIntOrNull() ?: 0, rejectedEggs = rejected.toIntOrNull() ?: 0, feedConsumedKg = feed.toDoubleOrNull() ?: 0.0)
+    val draft = DailyProduction(
+        localId = existing?.localId ?: "",
+        id = existing?.id.orEmpty(),
+        farmId = state.flock?.farmId.orEmpty(),
+        shedId = state.flock?.shedId.orEmpty(),
+        flockId = state.flock?.id.orEmpty(),
+        date = date,
+        openingLiveBirds = opening.toIntOrNull() ?: 0,
+        mortality = mortality.toIntOrNull() ?: 0,
+        culls = culls.toIntOrNull() ?: 0,
+        closingLiveBirds = ProductionCalculator.closingLiveBirds(opening.toIntOrNull() ?: 0, mortality.toIntOrNull() ?: 0, culls.toIntOrNull() ?: 0),
+        eggsCollected = eggs.toIntOrNull() ?: 0,
+        brokenEggs = broken.toIntOrNull() ?: 0,
+        dirtyEggs = dirty.toIntOrNull() ?: 0,
+        usableEggs = usable.toIntOrNull() ?: 0,
+        rejectedEggs = rejected.toIntOrNull() ?: 0,
+        feedConsumedKg = feed.toDoubleOrNull() ?: 0.0,
+        remarks = remarks,
+        enteredBy = existing?.enteredBy.orEmpty(),
+        idempotencyKey = existing?.idempotencyKey ?: "",
+        createdAt = existing?.createdAt ?: 0L,
+        updatedAt = existing?.updatedAt ?: 0L
+    )
     val metrics = ProductionCalculator.metrics(draft)
     Scaffold(topBar = { TopAppBar(title = { Text(if (existing == null) "Daily production" else "Edit production") }, navigationIcon = { TextButton({ navController.popBackStack() }) { Text("Back") } }) }) { padding ->
         if (state.loading) { CircularProgressIndicator(Modifier.padding(padding).padding(24.dp)); return@Scaffold }
