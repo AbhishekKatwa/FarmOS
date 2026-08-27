@@ -8,15 +8,14 @@ data class User(
     @PrimaryKey val id: String,
     val name: String,
     val email: String,
-    val password: String,
     val createdAt: Long,
     val updatedAt: Long,
     val isActive: Boolean = true,
-    val role: UserRole = UserRole.FARMER
+    val role: UserRole = UserRole.WORKER
 )
 
 enum class UserRole {
-    FARMER,
-    ADMIN,
-    SUPERVISOR
+    OWNER,
+    MANAGER,
+    WORKER
 }

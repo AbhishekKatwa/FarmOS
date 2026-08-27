@@ -1,0 +1,7 @@
+# Copy to local.properties (gitignored) and fill in values from the Supabase project settings.
+# Use the anon / public key only. Never put the service_role key in this file or in the Android app.
+
+sdk.dir=/path/to/Android/sdk
+
+supabase.url=https://YOUR_PROJECT_REF.supabase.co
+supabase.anon_key=YOUR_SUPABASE_ANON_KEY

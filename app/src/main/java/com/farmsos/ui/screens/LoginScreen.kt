@@ -23,7 +23,6 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -34,32 +33,20 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
-import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import androidx.navigation.NavController
-import com.farmsos.ui.navigation.Screen
+import com.farmsos.ui.auth.AuthViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun LoginScreen(
-    navController: NavController,
-    viewModel: LoginViewModel = hiltViewModel()
+    viewModel: AuthViewModel
 ) {
     var email by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
     var showPassword by remember { mutableStateOf(false) }
     var fieldError by remember { mutableStateOf<String?>(null) }
 
-    val state by viewModel.state.collectAsStateWithLifecycle()
-
-    LaunchedEffect(state.isSuccess) {
-        if (state.isSuccess) {
-            viewModel.resetSuccess()
-            navController.navigate(Screen.Home.route) {
-                popUpTo(Screen.Login.route) { inclusive = true }
-            }
-        }
-    }
+    val uiState by viewModel.uiState.collectAsStateWithLifecycle()
 
     Scaffold(
         topBar = { TopAppBar(title = { Text("FarmOS") }) }
@@ -84,7 +71,7 @@ fun LoginScreen(
             )
             Spacer(modifier = Modifier.height(32.dp))
 
-            val errorText = fieldError ?: state.errorMessage
+            val errorText = fieldError ?: uiState.errorMessage
             val showError = errorText != null
 
             OutlinedTextField(
@@ -92,14 +79,21 @@ fun LoginScreen(
                 onValueChange = {
                     email = it
                     fieldError = null
+                    viewModel.clearMessages()
                 },
                 label = { Text("Email address") },
                 singleLine = true,
                 isError = showError,
-                supportingText = if (showError) {
-                    { Text(errorText!!) }
-                } else null,
-                enabled = !state.isLoading,
+                supportingText = when {
+                    showError -> {
+                        { Text(errorText!!) }
+                    }
+                    uiState.infoMessage != null -> {
+                        { Text(uiState.infoMessage!!) }
+                    }
+                    else -> null
+                },
+                enabled = !uiState.isLoading,
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email),
                 modifier = Modifier.fillMaxWidth()
             )
@@ -111,6 +105,7 @@ fun LoginScreen(
                 onValueChange = {
                     password = it
                     fieldError = null
+                    viewModel.clearMessages()
                 },
                 label = { Text("Password") },
                 singleLine = true,
@@ -124,7 +119,7 @@ fun LoginScreen(
                         )
                     }
                 },
-                enabled = !state.isLoading,
+                enabled = !uiState.isLoading,
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
                 modifier = Modifier.fillMaxWidth()
             )
@@ -141,10 +136,10 @@ fun LoginScreen(
                         else -> viewModel.login(email, password)
                     }
                 },
-                enabled = !state.isLoading,
+                enabled = !uiState.isLoading,
                 modifier = Modifier.fillMaxWidth()
             ) {
-                if (state.isLoading) {
+                if (uiState.isLoading) {
                     CircularProgressIndicator(
                         modifier = Modifier.height(20.dp),
                         strokeWidth = 2.dp,
@@ -162,6 +157,20 @@ fun LoginScreen(
                     when {
                         email.isBlank() || !email.contains("@") ->
                             fieldError = "Please enter a valid email first"
+                        else -> viewModel.resetPassword(email)
+                    }
+                },
+                enabled = !uiState.isLoading,
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                Text("Forgot password")
+            }
+
+            TextButton(
+                onClick = {
+                    when {
+                        email.isBlank() || !email.contains("@") ->
+                            fieldError = "Please enter a valid email"
                         password.isBlank() || password.length < 6 ->
                             fieldError = "Password must be at least 6 characters"
                         else -> viewModel.signUp(
@@ -171,7 +180,7 @@ fun LoginScreen(
                         )
                     }
                 },
-                enabled = !state.isLoading,
+                enabled = !uiState.isLoading,
                 modifier = Modifier.fillMaxWidth()
             ) {
                 Text("Create account")

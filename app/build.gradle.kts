@@ -1,3 +1,5 @@
+import java.util.Properties
+
 plugins {
     id("com.android.application")
     id("org.jetbrains.kotlin.android")
@@ -9,14 +11,23 @@ plugins {
 
 android {
     namespace = "com.farmsos"
-    compileSdk = 37
+    compileSdk = 35
 
     defaultConfig {
         applicationId = "com.farmsos"
         minSdk = 24
-        targetSdk = 37
+        targetSdk = 35
         versionCode = 1
         versionName = "1.0.0"
+
+        val supabaseUrl = secretProperty("supabase.url")
+        val supabaseAnonKey = secretProperty("supabase.anon_key")
+        check(secretProperty("supabase.service_role").isEmpty()) {
+            "Do not define supabase.service_role for the Android app. Use the anon key only."
+        }
+
+        buildConfigField("String", "SUPABASE_URL", "\"${supabaseUrl.replace("\"", "\\\"")}\"")
+        buildConfigField("String", "SUPABASE_ANON_KEY", "\"${supabaseAnonKey.replace("\"", "\\\"")}\"")
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         vectorDrawables {
@@ -47,6 +58,7 @@ android {
         compose = true
         viewBinding = false
         dataBinding = false
+        buildConfig = true
     }
 
     packaging {
@@ -119,8 +131,23 @@ dependencies {
 
     // Testing
     testImplementation("junit:junit:4.13.2")
+    testImplementation("org.jetbrains.kotlinx:kotlinx-coroutines-test:1.11.0")
     androidTestImplementation("androidx.test.ext:junit:1.3.0")
     androidTestImplementation("androidx.compose.ui:ui-test-junit4")
     debugImplementation("androidx.compose.ui:ui-tooling")
     debugImplementation("androidx.compose.ui:ui-test-manifest")
+}
+
+fun secretProperty(key: String): String {
+    val localProperties = Properties()
+    val localFile = rootProject.file("local.properties")
+    if (localFile.exists()) {
+        localFile.inputStream().use { localProperties.load(it) }
+    }
+    check(!localProperties.containsKey("supabase.service_role")) {
+        "Remove supabase.service_role from local.properties. The Android app must never receive the service-role key."
+    }
+    return localProperties.getProperty(key)
+        ?: (project.findProperty(key) as String?)
+        ?: ""
 }

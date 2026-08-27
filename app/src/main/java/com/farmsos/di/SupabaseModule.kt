@@ -22,11 +22,15 @@ object SupabaseModule {
     @Provides
     @Singleton
     fun provideSupabaseClient(): SupabaseClient {
+        AppConfig.supabase.requireConfigured()
         return createSupabaseClient(
-            supabaseUrl = AppConfig.SUPABASE_URL,
-            supabaseKey = AppConfig.SUPABASE_ANON_KEY
+            supabaseUrl = AppConfig.supabase.url,
+            supabaseKey = AppConfig.supabase.anonKey
         ) {
-            install(Auth)
+            install(Auth) {
+                scheme = AppConfig.AUTH_DEEP_LINK_SCHEME
+                host = AppConfig.AUTH_DEEP_LINK_HOST
+            }
             install(Postgrest)
             install(Storage)
         }
@@ -34,19 +38,13 @@ object SupabaseModule {
 
     @Provides
     @Singleton
-    fun provideSupabaseAuth(client: SupabaseClient): Auth {
-        return client.auth
-    }
+    fun provideSupabaseAuth(client: SupabaseClient): Auth = client.auth
 
     @Provides
     @Singleton
-    fun provideSupabasePostgrest(client: SupabaseClient): Postgrest {
-        return client.postgrest
-    }
+    fun provideSupabasePostgrest(client: SupabaseClient): Postgrest = client.postgrest
 
     @Provides
     @Singleton
-    fun provideSupabaseStorage(client: SupabaseClient): Storage {
-        return client.storage
-    }
+    fun provideSupabaseStorage(client: SupabaseClient): Storage = client.storage
 }

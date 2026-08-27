@@ -1,4 +1,3 @@
-cat > .gitignore <<'EOF'
 # Android / Gradle
 .gradle/
 build/
@@ -10,8 +9,11 @@ build/
 *.iws
 *.ipr
 
-# Local configuration
+# Local configuration and secrets — never commit keys
 local.properties
+secrets.properties
+*.jks
+*.keystore
 
 # macOS
 .DS_Store
@@ -33,4 +35,3 @@ captures/
 
 # Logs
 *.log
-EOF
