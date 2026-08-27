@@ -9,5 +9,5 @@ fun DailyProductionDto.toDomain(entries: List<EggGradeEntry> = emptyList(), mort
     closingLiveBirds ?: ProductionCalculator.closingLiveBirds(openingLiveBirds, mortality, culls), eggsCollected, brokenEggs,
     dirtyEggs, usableEggs, rejectedEggs, feedConsumedKg, remarks, enteredBy.orEmpty(), entries, mortalityRecord)
 fun DailyProduction.toWriteDto() = DailyProductionWriteDto(farmId, shedId, flockId, date, openingLiveBirds, mortality, culls, eggsCollected, brokenEggs, dirtyEggs, usableEggs, rejectedEggs, feedConsumedKg, remarks)
-fun MortalityRecord.toDto(productionId: String) = MortalityRecordDto(productionId = productionId, farmId = farmId, flockId = flockId, date = date, mortalityCount = mortalityCount, cause = cause, remarks = remarks)
+fun MortalityRecord.toDto(productionId: String) = MortalityRecordDto(productionDailyId = productionId, farmId = farmId, flockId = flockId, date = date, mortalityCount = mortalityCount, cause = cause, remarks = remarks)
 fun MortalityRecordDto.toDomain() = MortalityRecord(id.orEmpty(), productionDailyId, farmId, flockId, date.take(10), mortalityCount, cause, remarks)

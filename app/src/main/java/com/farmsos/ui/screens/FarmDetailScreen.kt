@@ -80,6 +80,7 @@ fun FarmDetailScreen(
                 Button(onClick = { showAddFlock = true }, enabled = state.sheds.isNotEmpty()) {
                     Text("Add flock")
                 }
+                TextButton(onClick = { state.farm?.let { navController.navigate("farm/${it.id}/feed") } }) { Text("Feed inventory") }
             }
             Text("Sheds", style = MaterialTheme.typography.titleMedium)
             if (state.sheds.isEmpty()) {

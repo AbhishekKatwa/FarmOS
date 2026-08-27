@@ -77,6 +77,18 @@ class RlsMigrationTest {
         assertTrue(sql.contains("closing_live_birds integer GENERATED ALWAYS AS (opening_live_birds - mortality - culls) STORED"))
     }
 
+    @Test
+    fun feedLedgerHasDerivedStockProtectionAndRls() {
+        assertTrue(sql.contains("CREATE TABLE public.feed_items"))
+        assertTrue(sql.contains("CREATE TABLE public.feed_purchases"))
+        assertTrue(sql.contains("CREATE TABLE public.feed_consumption"))
+        assertTrue(sql.contains("CREATE TABLE public.feed_adjustments"))
+        assertTrue(sql.contains("CREATE OR REPLACE FUNCTION public.feed_item_stock"))
+        assertTrue(sql.contains("Feed inventory cannot be negative"))
+        assertTrue(sql.contains("Only an owner may authorize negative inventory"))
+        assertTrue(sql.contains("feed_consumption_members"))
+    }
+
     private fun loadMigrations(): String {
         val candidates = listOf(
             File("supabase/migrations"),

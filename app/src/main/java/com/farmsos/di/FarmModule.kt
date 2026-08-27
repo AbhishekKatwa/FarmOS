@@ -4,10 +4,12 @@ import com.farmsos.data.repository.FarmRepositoryImpl
 import com.farmsos.data.repository.FlockRepositoryImpl
 import com.farmsos.data.repository.ShedRepositoryImpl
 import com.farmsos.data.repository.ProductionRepositoryImpl
+import com.farmsos.data.repository.FeedRepositoryImpl
 import com.farmsos.domain.repository.FarmRepository
 import com.farmsos.domain.repository.FlockRepository
 import com.farmsos.domain.repository.ShedRepository
 import com.farmsos.domain.repository.ProductionRepository
+import com.farmsos.domain.repository.FeedRepository
 import dagger.Binds
 import dagger.Module
 import dagger.hilt.InstallIn
@@ -33,4 +35,5 @@ abstract class FarmModule {
     @Binds
     @Singleton
     abstract fun bindProductionRepository(impl: ProductionRepositoryImpl): ProductionRepository
+    @Binds @Singleton abstract fun bindFeedRepository(impl: FeedRepositoryImpl): FeedRepository
 }

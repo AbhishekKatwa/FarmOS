@@ -29,6 +29,7 @@ import com.farmsos.ui.screens.SettingsScreen
 import com.farmsos.ui.screens.ProductionDetailScreen
 import com.farmsos.ui.screens.ProductionEditorScreen
 import com.farmsos.ui.screens.ProductionHistoryScreen
+import com.farmsos.ui.screens.FeedInventoryScreen
 
 sealed class Screen(val route: String) {
     data object Home : Screen("home")
@@ -45,6 +46,7 @@ sealed class Screen(val route: String) {
     data object ProductionNew : Screen("farm/{farmId}/flock/{flockId}/production/new")
     data object ProductionDetail : Screen("farm/{farmId}/flock/{flockId}/production/{productionId}")
     data object ProductionEdit : Screen("farm/{farmId}/flock/{flockId}/production/{productionId}/edit")
+    data object FeedInventory : Screen("farm/{farmId}/feed")
 }
 
 @Composable
@@ -117,6 +119,7 @@ fun FarmOSNavigation(
         composable(Screen.ProductionNew.route, arguments = listOf(navArgument("farmId") { type = NavType.StringType }, navArgument("flockId") { type = NavType.StringType })) { ProductionEditorScreen(navController) }
         composable(Screen.ProductionDetail.route, arguments = listOf(navArgument("farmId") { type = NavType.StringType }, navArgument("flockId") { type = NavType.StringType }, navArgument("productionId") { type = NavType.StringType })) { ProductionDetailScreen(navController) }
         composable(Screen.ProductionEdit.route, arguments = listOf(navArgument("farmId") { type = NavType.StringType }, navArgument("flockId") { type = NavType.StringType }, navArgument("productionId") { type = NavType.StringType })) { ProductionEditorScreen(navController) }
+        composable(Screen.FeedInventory.route, arguments = listOf(navArgument("farmId") { type = NavType.StringType })) { FeedInventoryScreen(navController) }
         composable(Screen.Dashboard.route) {
             DashboardScreen(navController = navController)
         }

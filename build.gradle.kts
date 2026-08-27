@@ -12,7 +12,7 @@ plugins {
 val composeVersion = "1.5.10"
 val hiltVersion = "2.51.1"
 val roomVersion = "2.8.4"
-val lifecycleVersion = "2.8.7"
+val lifecycleVersion = "2.11.0"
 val workVersion = "2.11.2"
 val supabaseVersion = "3.1.1"
 

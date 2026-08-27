@@ -19,7 +19,7 @@ android {
         targetSdk = 35
         versionCode = 1
         versionName = "1.0.0"
-
+        val composeVersion = "1.5.10"
         val supabaseUrl = secretProperty("supabase.url")
         val supabaseAnonKey = secretProperty("supabase.anon_key")
         check(secretProperty("supabase.service_role").isEmpty()) {
@@ -70,6 +70,7 @@ android {
 
 dependencies {
     // Android Core
+    val composeVersion = "1.5.10"
     val lifecycleVersion = rootProject.extra["lifecycleVersion"] as String
     implementation("androidx.core:core-ktx:1.15.0")
     implementation("androidx.lifecycle:lifecycle-runtime-ktx:$lifecycleVersion")
@@ -117,11 +118,11 @@ dependencies {
     implementation("io.github.jan-tennert.supabase:realtime-kt:$supabaseVersion")
 
     // Ktor
-    implementation("io.ktor:ktor-client-android:3.5.2")
-    implementation("io.ktor:ktor-client-core:3.5.2")
-    implementation("io.ktor:ktor-client-logging:3.5.2")
-    implementation("io.ktor:ktor-client-content-negotiation:3.5.2")
-    implementation("io.ktor:ktor-serialization-kotlinx-json:3.5.2")
+    implementation("io.ktor:ktor-client-android:3.0.0")
+    implementation("io.ktor:ktor-client-core:3.0.0")
+    implementation("io.ktor:ktor-client-logging:3.0.0")
+    implementation("io.ktor:ktor-client-content-negotiation:3.0.0")
+    implementation("io.ktor:ktor-serialization-kotlinx-json:3.0.0")
 
     // Charts - Vico
     implementation("com.patrykandpatrick.vico:compose-m3:2.0.1")
@@ -133,9 +134,9 @@ dependencies {
     testImplementation("junit:junit:4.13.2")
     testImplementation("org.jetbrains.kotlinx:kotlinx-coroutines-test:1.11.0")
     androidTestImplementation("androidx.test.ext:junit:1.3.0")
-    androidTestImplementation("androidx.compose.ui:ui-test-junit4")
+    androidTestImplementation("androidx.compose.ui:ui-test-junit4:$composeVersion")
     debugImplementation("androidx.compose.ui:ui-tooling")
-    debugImplementation("androidx.compose.ui:ui-test-manifest")
+    debugImplementation("androidx.compose.ui:ui-test-manifest:$composeVersion")
 }
 
 fun secretProperty(key: String): String {
