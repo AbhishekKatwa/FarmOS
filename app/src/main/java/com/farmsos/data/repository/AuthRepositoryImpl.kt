@@ -110,7 +110,7 @@ class AuthRepositoryImpl @Inject constructor(
     private suspend fun resolveUser(userInfo: UserInfo): User {
         val profile = runCatching {
             postgrest["profiles"].select {
-                ProfileDto::id eq userInfo.id
+                filter { ProfileDto::id eq userInfo.id }
             }.decodeSingleOrNull<ProfileDto>()?.toDomain()
         }.onFailure { logger.w("Profile lookup failed: ${it.message}", it) }.getOrNull()
         return userInfo.toDomainUser(profile)

@@ -20,7 +20,9 @@ class FlockRepositoryImpl @Inject constructor(
     override suspend fun listByFarm(farmId: String): Result<List<Flock>> {
         return runCatching {
             postgrest["flocks"].select {
-                FlockDto::farmId eq farmId
+                filter {
+                    FlockDto::farmId eq farmId
+                }
             }.decodeList<FlockDto>().map { it.toDomain() }
         }.onFailure { logger.e("Failed to list flocks: ${it.message}", it) }
     }
@@ -28,7 +30,7 @@ class FlockRepositoryImpl @Inject constructor(
     override suspend fun listByShed(shedId: String): Result<List<Flock>> {
         return runCatching {
             postgrest["flocks"].select {
-                FlockDto::shedId eq shedId
+                filter {FlockDto::shedId eq shedId}
             }.decodeList<FlockDto>().map { it.toDomain() }
         }.onFailure { logger.e("Failed to list flocks by shed: ${it.message}", it) }
     }
@@ -36,7 +38,7 @@ class FlockRepositoryImpl @Inject constructor(
     override suspend fun getFlock(id: String): Result<Flock> {
         return runCatching {
             postgrest["flocks"].select {
-                FlockDto::id eq id
+                filter {FlockDto::id eq id}
             }.decodeSingle<FlockDto>().toDomain()
         }.onFailure { logger.e("Failed to load flock: ${it.message}", it) }
     }

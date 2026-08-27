@@ -19,7 +19,7 @@ class ShedRepositoryImpl @Inject constructor(
     override suspend fun listByFarm(farmId: String, includeArchived: Boolean): Result<List<Shed>> {
         return runCatching {
             val rows = postgrest["sheds"].select {
-                ShedDto::farmId eq farmId
+                filter {ShedDto::farmId eq farmId}
             }.decodeList<ShedDto>().map { it.toDomain() }
             if (includeArchived) rows else rows.filter { it.isActive }
         }.onFailure { logger.e("Failed to list sheds: ${it.message}", it) }
@@ -28,7 +28,7 @@ class ShedRepositoryImpl @Inject constructor(
     override suspend fun getShed(id: String): Result<Shed> {
         return runCatching {
             postgrest["sheds"].select {
-                ShedDto::id eq id
+                filter {ShedDto::id eq id}
             }.decodeSingle<ShedDto>().toDomain()
         }.onFailure { logger.e("Failed to load shed: ${it.message}", it) }
     }

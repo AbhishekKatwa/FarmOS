@@ -19,7 +19,7 @@ fun LoginScreen(
     val authState by viewModel.authState.collectAsState()
 
     LaunchedEffect(authState) {
-        if (authState is AuthState.Success) {
+        if (authState is AuthUiState.Success) {
             onLoginSuccess()
             viewModel.clearState()
         }
@@ -55,7 +55,7 @@ fun LoginScreen(
 
         Spacer(modifier = Modifier.height(24.dp))
 
-        if (authState is AuthState.Loading) {
+        if (authState is AuthUiState.Loading) {
             CircularProgressIndicator()
         } else {
             Button(
@@ -66,9 +66,9 @@ fun LoginScreen(
             }
         }
 
-        if (authState is AuthState.Error) {
+        if (authState is AuthUiState.Error) {
             Text(
-                text = (authState as AuthState.Error).message,
+                text = (authState as AuthUiState.Error).message,
                 color = MaterialTheme.colorScheme.error,
                 modifier = Modifier.padding(top = 8.dp)
             )
@@ -82,7 +82,7 @@ fun LoginScreen(
             Text("Forgot Password?")
         }
         
-        if (authState is AuthState.PasswordResetSent) {
+        if (authState is AuthUiState.PasswordResetSent) {
             Text(
                 text = "Password reset email sent!",
                 color = MaterialTheme.colorScheme.primary,

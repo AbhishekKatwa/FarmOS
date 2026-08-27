@@ -192,9 +192,9 @@ private fun FeedItemDialog(
                 save(
                     n,
                     t,
-                    o.toDoubleOrNull() ?: -1,
+                    o.toDoubleOrNull() ?: -1.0,
                     c.toDoubleOrNull()
-                );
+                )
             }) { Text("Save") }
         },
         dismissButton = { TextButton(dismiss) { Text("Cancel") } })
@@ -233,8 +233,8 @@ private fun FeedTransactionDialog(
         confirmButton = {
             TextButton({
                 save(
-                    q.toDoubleOrNull() ?: -1,
-                    price.toDoubleOrNull() ?: -1,
+                    q.toDoubleOrNull() ?: -1.0,
+                    price.toDoubleOrNull() ?: -1.0,
                     supplier,
                     consume
                 )

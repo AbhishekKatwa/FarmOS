@@ -13,6 +13,9 @@ object FarmPermissions {
 
     fun canUpdateFarm(role: UserRole): Boolean = canWriteFarmStructure(role)
 
+    private fun canWriteFarmStructure(role: UserRole): Boolean =
+        role == UserRole.OWNER || role == UserRole.MANAGER
+
     fun canDeleteFarm(role: UserRole): Boolean = role == UserRole.OWNER
 
     fun canTransferOwnership(role: UserRole): Boolean = role == UserRole.OWNER

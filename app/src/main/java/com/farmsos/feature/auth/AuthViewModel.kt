@@ -3,6 +3,7 @@ package com.farmsos.feature.auth
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.farmsos.domain.model.User
+import com.farmsos.domain.model.AuthState as DomainAuthState
 import com.farmsos.domain.usecase.auth.AuthUseCases
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -16,8 +17,8 @@ class AuthViewModel @Inject constructor(
     private val authUseCases: AuthUseCases
 ) : ViewModel() {
 
-    private val _authState = MutableStateFlow<AuthState>(AuthState.Idle)
-    val authState: StateFlow<AuthState> = _authState.asStateFlow()
+    private val _authState = MutableStateFlow<AuthUiState>(AuthUiState.Idle)
+    val authState: StateFlow<AuthUiState> = _authState.asStateFlow()
 
     private val _currentUser = MutableStateFlow<User?>(null)
     val currentUser: StateFlow<User?> = _currentUser.asStateFlow()
@@ -28,21 +29,24 @@ class AuthViewModel @Inject constructor(
 
     private fun observeAuthState() {
         viewModelScope.launch {
-            authUseCases.observeAuthState().collect { user ->
-                _currentUser.value = user
+            authUseCases.observeAuthState().collect { state ->
+                _currentUser.value = when (state) {
+                    is DomainAuthState.Authenticated -> state.user
+                    else -> null
+                }
             }
         }
     }
 
     fun login(email: String, password: String) {
         viewModelScope.launch {
-            _authState.value = AuthState.Loading
+            _authState.value = AuthUiState.Loading
             authUseCases.login(email, password)
                 .onSuccess {
-                    _authState.value = AuthState.Success
+                    _authState.value = AuthUiState.Success
                 }
                 .onFailure { error ->
-                    _authState.value = AuthState.Error(error.message ?: "Login failed")
+                    _authState.value = AuthUiState.Error(error.message ?: "Login failed")
                 }
         }
     }
@@ -55,26 +59,26 @@ class AuthViewModel @Inject constructor(
 
     fun resetPassword(email: String) {
         viewModelScope.launch {
-            _authState.value = AuthState.Loading
+            _authState.value = AuthUiState.Loading
             authUseCases.resetPassword(email)
                 .onSuccess {
-                    _authState.value = AuthState.PasswordResetSent
+                    _authState.value = AuthUiState.PasswordResetSent
                 }
                 .onFailure { error ->
-                    _authState.value = AuthState.Error(error.message ?: "Failed to send reset email")
+                    _authState.value = AuthUiState.Error(error.message ?: "Failed to send reset email")
                 }
         }
     }
 
     fun clearState() {
-        _authState.value = AuthState.Idle
+        _authState.value = AuthUiState.Idle
     }
 }
 
-sealed class AuthState {
-    object Idle : AuthState()
-    object Loading : AuthState()
-    object Success : AuthState()
-    object PasswordResetSent : AuthState()
-    data class Error(val message: String) : AuthState()
+sealed class AuthUiState {
+    object Idle : AuthUiState()
+    object Loading : AuthUiState()
+    object Success : AuthUiState()
+    object PasswordResetSent : AuthUiState()
+    data class Error(val message: String) : AuthUiState()
 }

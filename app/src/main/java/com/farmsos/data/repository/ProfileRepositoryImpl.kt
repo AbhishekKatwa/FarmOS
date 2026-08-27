@@ -18,7 +18,7 @@ class ProfileRepositoryImpl @Inject constructor(
     override suspend fun getProfile(userId: String): Result<Profile> {
         return runCatching {
             postgrest["profiles"].select {
-                ProfileDto::id eq userId
+                filter { ProfileDto::id eq userId }
             }.decodeSingle<ProfileDto>().toDomain()
         }.onFailure { logger.e("Failed to load profile: ${it.message}", it) }
     }

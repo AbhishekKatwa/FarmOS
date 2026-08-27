@@ -26,7 +26,9 @@ class FarmRepositoryImpl @Inject constructor(
     override suspend fun refreshFarms(): Result<List<Farm>> {
         return runCatching {
             val loaded = postgrest["farms"].select {
-                FarmDto::isActive eq true
+                filter {
+                    FarmDto::isActive eq true
+                }
             }.decodeList<FarmDto>().map { it.toDomain() }
             farms.value = loaded
             loaded
@@ -36,7 +38,9 @@ class FarmRepositoryImpl @Inject constructor(
     override suspend fun getFarm(id: String): Result<Farm> {
         return runCatching {
             postgrest["farms"].select {
-                FarmDto::id eq id
+                filter {
+                    FarmDto::id eq id
+                }
             }.decodeSingle<FarmDto>().toDomain()
         }.onFailure { logger.e("Failed to load farm: ${it.message}", it) }
     }
@@ -44,7 +48,9 @@ class FarmRepositoryImpl @Inject constructor(
     override suspend fun getFarmsByOwner(ownerId: String): Result<List<Farm>> {
         return runCatching {
             postgrest["farms"].select {
-                FarmDto::ownerId eq ownerId
+                filter {
+                    FarmDto::ownerId eq ownerId
+                }
             }.decodeList<FarmDto>().map { it.toDomain() }
         }.onFailure { logger.e("Failed to load farms by owner: ${it.message}", it) }
     }
