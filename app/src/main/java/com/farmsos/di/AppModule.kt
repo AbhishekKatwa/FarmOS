@@ -5,11 +5,9 @@ import androidx.room.Room
 import com.farmsos.core.logging.AppLogger
 import com.farmsos.core.network.ApiClient
 import com.farmsos.core.network.NetworkManager
-import com.farmsos.domain.repository.FarmRepository
 import com.farmsos.domain.repository.UserRepository
 import com.farmsos.data.local.FarmDatabase
 import com.farmsos.data.local.UserDatabase
-import com.farmsos.data.repository.FarmRepositoryImpl
 import com.farmsos.data.repository.UserRepositoryImpl
 import dagger.Module
 import dagger.Provides
@@ -60,16 +58,6 @@ class AppModule {
             UserDatabase::class.java,
             "user_database"
         ).build()
-    }
-
-    @Provides
-    @Singleton
-    fun provideFarmRepository(
-        apiClient: ApiClient,
-        farmDatabase: FarmDatabase,
-        logger: AppLogger
-    ): FarmRepository {
-        return FarmRepositoryImpl(apiClient, farmDatabase, logger)
     }
 
     @Provides

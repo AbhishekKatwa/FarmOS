@@ -21,7 +21,10 @@ class RlsMigrationTest {
         assertTrue(sql.contains("profiles_email_idx"))
         assertTrue(sql.contains("farms_owner_id_idx"))
         assertTrue(sql.contains("farm_members_user_id_idx"))
-        assertTrue(sql.contains("farm_members_one_owner_per_farm"))
+        assertTrue(sql.contains("CREATE TABLE IF NOT EXISTS public.sheds"))
+        assertTrue(sql.contains("CREATE TABLE IF NOT EXISTS public.flocks"))
+        assertTrue(sql.contains("CONSTRAINT flocks_shed_same_farm"))
+        assertTrue(sql.contains("REFERENCES public.sheds (id, farm_id)"))
     }
 
     @Test
@@ -31,6 +34,8 @@ class RlsMigrationTest {
         assertTrue(sql.contains("farms_select_members"))
         assertTrue(sql.contains("USING (public.is_farm_member(id))"))
         assertTrue(sql.contains("farm_members_select_members"))
+        assertTrue(sql.contains("sheds_select_members"))
+        assertTrue(sql.contains("flocks_select_members"))
         assertTrue(sql.contains("USING (public.is_farm_member(farm_id))"))
     }
 
@@ -45,6 +50,8 @@ class RlsMigrationTest {
         assertTrue(sql.contains("role = 'WORKER'"))
         assertTrue(sql.contains("AND public.user_has_farm_role(farm_id, ARRAY['MANAGER']"))
         assertFalse(sql.contains("service_role"))
+        assertTrue(sql.contains("sheds_insert_owner_manager"))
+        assertTrue(sql.contains("flocks_insert_owner_manager"))
     }
 
     @Test

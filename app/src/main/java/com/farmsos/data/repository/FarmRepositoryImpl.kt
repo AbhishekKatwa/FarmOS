@@ -1,83 +1,96 @@
 package com.farmsos.data.repository
 
-import com.farmsos.core.error.AppError
 import com.farmsos.core.logging.AppLogger
-import com.farmsos.core.network.ApiClient
-import com.farmsos.data.local.FarmDao
-import com.farmsos.data.local.FarmDatabase
+import com.farmsos.data.mapper.toDomain
+import com.farmsos.data.remote.dto.FarmDto
+import com.farmsos.data.remote.dto.FarmInsertDto
 import com.farmsos.domain.model.Farm
 import com.farmsos.domain.repository.FarmRepository
+import io.github.jan.supabase.postgrest.Postgrest
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import javax.inject.Inject
+import javax.inject.Singleton
 
+@Singleton
 class FarmRepositoryImpl @Inject constructor(
-    private val apiClient: ApiClient,
-    private val farmDatabase: FarmDatabase,
+    private val postgrest: Postgrest,
     private val logger: AppLogger
 ) : FarmRepository {
 
-    private val farmDao: FarmDao = farmDatabase.farmDao()
+    private val farms = MutableStateFlow<List<Farm>>(emptyList())
+
+    override fun getAllFarms(): Flow<List<Farm>> = farms.asStateFlow()
+
+    override suspend fun refreshFarms(): Result<List<Farm>> {
+        return runCatching {
+            val loaded = postgrest["farms"].select {
+                FarmDto::isActive eq true
+            }.decodeList<FarmDto>().map { it.toDomain() }
+            farms.value = loaded
+            loaded
+        }.onFailure { logger.e("Failed to load farms: ${it.message}", it) }
+    }
 
     override suspend fun getFarm(id: String): Result<Farm> {
-        return try {
-            val farm = farmDao.getFarmById(id)
-            if (farm != null) {
-                Result.success(farm)
-            } else {
-                Result.failure(Exception("Farm not found"))
-            }
-        } catch (e: Exception) {
-            logger.e("Error getting farm: ${e.message}", e)
-            Result.failure(e)
-        }
+        return runCatching {
+            postgrest["farms"].select {
+                FarmDto::id eq id
+            }.decodeSingle<FarmDto>().toDomain()
+        }.onFailure { logger.e("Failed to load farm: ${it.message}", it) }
     }
 
     override suspend fun getFarmsByOwner(ownerId: String): Result<List<Farm>> {
-        return try {
-            val farms = farmDao.getFarmsByOwner(ownerId)
-            Result.success(farms)
-        } catch (e: Exception) {
-            logger.e("Error getting farms by owner: ${e.message}", e)
-            Result.failure(e)
-        }
+        return runCatching {
+            postgrest["farms"].select {
+                FarmDto::ownerId eq ownerId
+            }.decodeList<FarmDto>().map { it.toDomain() }
+        }.onFailure { logger.e("Failed to load farms by owner: ${it.message}", it) }
     }
 
     override suspend fun insertFarm(farm: Farm): Result<Unit> {
-        return try {
-            farmDao.insertFarm(farm)
-            Result.success(Unit)
-        } catch (e: Exception) {
-            logger.e("Error inserting farm: ${e.message}", e)
-            Result.failure(e)
-        }
+        return createFarm(farm.name, farm.location, farm.ownerId).map { }
+    }
+
+    override suspend fun createFarm(name: String, location: String, ownerId: String): Result<Farm> {
+        return runCatching {
+            val created = postgrest["farms"].insert(FarmInsertDto(name = name, location = location, ownerId = ownerId)) {
+                select()
+            }.decodeSingle<FarmDto>().toDomain()
+            refreshFarms()
+            created
+        }.onFailure { logger.e("Failed to create farm: ${it.message}", it) }
     }
 
     override suspend fun updateFarm(farm: Farm): Result<Unit> {
-        return try {
-            farmDao.updateFarm(farm)
-            Result.success(Unit)
-        } catch (e: Exception) {
-            logger.e("Error updating farm: ${e.message}", e)
-            Result.failure(e)
-        }
-    }
-
-    override suspend fun deleteFarm(id: String): Result<Unit> {
-        return try {
-            val farm = farmDao.getFarmById(id)
-            if (farm != null) {
-                farmDao.deleteFarm(farm)
-                Result.success(Unit)
-            } else {
-                Result.failure(Exception("Farm not found"))
+        return runCatching {
+            postgrest["farms"].update({
+                FarmDto::name setTo farm.name
+                FarmDto::location setTo farm.location
+            }) {
+                filter {
+                    FarmDto::id eq farm.id
+                }
             }
-        } catch (e: Exception) {
-            logger.e("Error deleting farm: ${e.message}", e)
-            Result.failure(e)
-        }
+            refreshFarms()
+            Unit
+        }.onFailure { logger.e("Failed to update farm: ${it.message}", it) }
     }
 
-    override fun getAllFarms(): Flow<List<Farm>> {
-        return farmDao.getAllFarms()
+    override suspend fun archiveFarm(id: String): Result<Unit> {
+        return runCatching {
+            postgrest["farms"].update({
+                FarmDto::isActive setTo false
+            }) {
+                filter {
+                    FarmDto::id eq id
+                }
+            }
+            refreshFarms()
+            Unit
+        }.onFailure { logger.e("Failed to archive farm: ${it.message}", it) }
     }
+
+    override suspend fun deleteFarm(id: String): Result<Unit> = archiveFarm(id)
 }

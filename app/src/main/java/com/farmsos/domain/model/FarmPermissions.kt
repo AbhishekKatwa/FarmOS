@@ -11,8 +11,7 @@ package com.farmsos.domain.model
 object FarmPermissions {
     fun canReadFarm(role: UserRole): Boolean = true
 
-    fun canUpdateFarm(role: UserRole): Boolean =
-        role == UserRole.OWNER || role == UserRole.MANAGER
+    fun canUpdateFarm(role: UserRole): Boolean = canWriteFarmStructure(role)
 
     fun canDeleteFarm(role: UserRole): Boolean = role == UserRole.OWNER
 

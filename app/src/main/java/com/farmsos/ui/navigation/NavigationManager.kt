@@ -16,9 +16,13 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import androidx.navigation.NavType
+import androidx.navigation.navArgument
 import com.farmsos.domain.model.AuthState
 import com.farmsos.ui.auth.AuthViewModel
 import com.farmsos.ui.screens.DashboardScreen
+import com.farmsos.ui.screens.FarmDetailScreen
+import com.farmsos.ui.screens.FlockDetailScreen
 import com.farmsos.ui.screens.HomeScreen
 import com.farmsos.ui.screens.LoginScreen
 import com.farmsos.ui.screens.SettingsScreen
@@ -28,6 +32,12 @@ sealed class Screen(val route: String) {
     data object Login : Screen("login")
     data object Dashboard : Screen("dashboard")
     data object Settings : Screen("settings")
+    data object FarmDetail : Screen("farm/{farmId}") {
+        fun create(farmId: String) = "farm/$farmId"
+    }
+    data object FlockDetail : Screen("farm/{farmId}/flock/{flockId}") {
+        fun create(farmId: String, flockId: String) = "farm/$farmId/flock/$flockId"
+    }
 }
 
 @Composable
@@ -80,6 +90,21 @@ fun FarmOSNavigation(
         }
         composable(Screen.Home.route) {
             HomeScreen(navController = navController)
+        }
+        composable(
+            route = Screen.FarmDetail.route,
+            arguments = listOf(navArgument("farmId") { type = NavType.StringType })
+        ) {
+            FarmDetailScreen(navController = navController)
+        }
+        composable(
+            route = Screen.FlockDetail.route,
+            arguments = listOf(
+                navArgument("farmId") { type = NavType.StringType },
+                navArgument("flockId") { type = NavType.StringType }
+            )
+        ) {
+            FlockDetailScreen(navController = navController)
         }
         composable(Screen.Dashboard.route) {
             DashboardScreen(navController = navController)

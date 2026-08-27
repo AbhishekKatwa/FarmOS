@@ -1,6 +1,6 @@
 package com.farmsos.ui.screens
 
-import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -52,7 +52,7 @@ fun HomeScreen(
 ) {
     val farms by viewModel.farms.collectAsState()
     var showAddDialog by remember { mutableStateOf(false) }
-    var farmToDelete by remember { mutableStateOf<Farm?>(null) }
+    var farmToArchive by remember { mutableStateOf<Farm?>(null) }
 
     Scaffold(
         topBar = {
@@ -106,7 +106,8 @@ fun HomeScreen(
                 items(farms, key = { it.id }) { farm ->
                     FarmCard(
                         farm = farm,
-                        onDeleteClick = { farmToDelete = farm }
+                        onClick = { navController.navigate("farm/${farm.id}") },
+                        onArchiveClick = { farmToArchive = farm }
                     )
                 }
                 item { Spacer(modifier = Modifier.height(80.dp)) }
@@ -124,23 +125,23 @@ fun HomeScreen(
         )
     }
 
-    farmToDelete?.let { farm ->
+    farmToArchive?.let { farm ->
         AlertDialog(
-            onDismissRequest = { farmToDelete = null },
-            title = { Text("Delete Farm") },
-            text = { Text("Are you sure you want to delete \"${farm.name}\"?") },
+            onDismissRequest = { farmToArchive = null },
+            title = { Text("Archive Farm") },
+            text = { Text("Archive \"${farm.name}\"? It will be hidden from the active farm list.") },
             confirmButton = {
                 TextButton(
                     onClick = {
-                        viewModel.deleteFarm(farm)
-                        farmToDelete = null
+                        viewModel.archiveSelectedFarm(farm)
+                        farmToArchive = null
                     }
                 ) {
-                    Text("Delete")
+                    Text("Archive")
                 }
             },
             dismissButton = {
-                TextButton(onClick = { farmToDelete = null }) {
+                TextButton(onClick = { farmToArchive = null }) {
                     Text("Cancel")
                 }
             }
@@ -151,12 +152,15 @@ fun HomeScreen(
 @Composable
 private fun FarmCard(
     farm: Farm,
-    onDeleteClick: () -> Unit
+    onClick: () -> Unit,
+    onArchiveClick: () -> Unit
 ) {
     val dateFormat = remember { SimpleDateFormat("MMM d, yyyy", Locale.getDefault()) }
 
     Card(
-        modifier = Modifier.fillMaxWidth(),
+        modifier = Modifier
+            .fillMaxWidth()
+            .clickable(onClick = onClick),
         elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
     ) {
         Row(
@@ -188,10 +192,10 @@ private fun FarmCard(
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
             }
-            IconButton(onClick = onDeleteClick) {
+            IconButton(onClick = onArchiveClick) {
                 Icon(
                     Icons.Default.Delete,
-                    contentDescription = "Delete farm",
+                    contentDescription = "Archive farm",
                     tint = MaterialTheme.colorScheme.error
                 )
             }
