@@ -95,6 +95,9 @@ fun FlockDetailScreen(
                     style = MaterialTheme.typography.bodyMedium
                 )
             }
+            Button(onClick = { navController.navigate("farm/${flock?.farmId}/flock/${flock?.id}/production") }, modifier = Modifier.fillMaxWidth(), enabled = flock != null) {
+                Text("Daily production")
+            }
             OutlinedTextField(code, { code = it }, label = { Text("Flock code") }, modifier = Modifier.fillMaxWidth())
             OutlinedTextField(breed, { breed = it }, label = { Text("Breed") }, modifier = Modifier.fillMaxWidth())
             OutlinedTextField(strain, { strain = it }, label = { Text("Strain") }, modifier = Modifier.fillMaxWidth())

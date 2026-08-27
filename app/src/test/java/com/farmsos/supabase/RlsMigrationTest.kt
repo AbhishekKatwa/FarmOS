@@ -25,6 +25,11 @@ class RlsMigrationTest {
         assertTrue(sql.contains("CREATE TABLE IF NOT EXISTS public.flocks"))
         assertTrue(sql.contains("CONSTRAINT flocks_shed_same_farm"))
         assertTrue(sql.contains("REFERENCES public.sheds (id, farm_id)"))
+        assertTrue(sql.contains("CREATE TABLE IF NOT EXISTS public.production_daily"))
+        assertTrue(sql.contains("CREATE TABLE IF NOT EXISTS public.production_egg_grades"))
+        assertTrue(sql.contains("CREATE TABLE IF NOT EXISTS public.mortality_records"))
+        assertTrue(sql.contains("production_daily_unique_flock_date UNIQUE (flock_id, date)"))
+        assertTrue(sql.contains("production_daily_losses_not_above_opening"))
     }
 
     @Test
@@ -37,6 +42,8 @@ class RlsMigrationTest {
         assertTrue(sql.contains("sheds_select_members"))
         assertTrue(sql.contains("flocks_select_members"))
         assertTrue(sql.contains("USING (public.is_farm_member(farm_id))"))
+        assertTrue(sql.contains("production_daily_select_members"))
+        assertTrue(sql.contains("mortality_records_select_members"))
     }
 
     @Test
@@ -59,6 +66,15 @@ class RlsMigrationTest {
         assertTrue(sql.contains("CREATE OR REPLACE FUNCTION public.current_user_farm_ids()"))
         assertTrue(sql.contains("SECURITY DEFINER"))
         assertTrue(sql.contains("WHERE user_id = auth.uid()"))
+    }
+
+    @Test
+    fun dailyProductionPreventsDuplicatesAndInvalidCountsInDatabase() {
+        assertTrue(sql.contains("CONSTRAINT production_daily_unique_flock_date UNIQUE (flock_id, date)"))
+        assertTrue(sql.contains("CHECK (mortality + culls <= opening_live_birds)"))
+        assertTrue(sql.contains("CHECK (eggs_collected >= 0)"))
+        assertTrue(sql.contains("CHECK (feed_consumed_kg >= 0)"))
+        assertTrue(sql.contains("closing_live_birds integer GENERATED ALWAYS AS (opening_live_birds - mortality - culls) STORED"))
     }
 
     private fun loadMigrations(): String {

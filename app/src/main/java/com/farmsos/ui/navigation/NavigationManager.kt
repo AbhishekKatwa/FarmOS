@@ -26,6 +26,9 @@ import com.farmsos.ui.screens.FlockDetailScreen
 import com.farmsos.ui.screens.HomeScreen
 import com.farmsos.ui.screens.LoginScreen
 import com.farmsos.ui.screens.SettingsScreen
+import com.farmsos.ui.screens.ProductionDetailScreen
+import com.farmsos.ui.screens.ProductionEditorScreen
+import com.farmsos.ui.screens.ProductionHistoryScreen
 
 sealed class Screen(val route: String) {
     data object Home : Screen("home")
@@ -38,6 +41,10 @@ sealed class Screen(val route: String) {
     data object FlockDetail : Screen("farm/{farmId}/flock/{flockId}") {
         fun create(farmId: String, flockId: String) = "farm/$farmId/flock/$flockId"
     }
+    data object ProductionHistory : Screen("farm/{farmId}/flock/{flockId}/production")
+    data object ProductionNew : Screen("farm/{farmId}/flock/{flockId}/production/new")
+    data object ProductionDetail : Screen("farm/{farmId}/flock/{flockId}/production/{productionId}")
+    data object ProductionEdit : Screen("farm/{farmId}/flock/{flockId}/production/{productionId}/edit")
 }
 
 @Composable
@@ -106,6 +113,10 @@ fun FarmOSNavigation(
         ) {
             FlockDetailScreen(navController = navController)
         }
+        composable(Screen.ProductionHistory.route, arguments = listOf(navArgument("farmId") { type = NavType.StringType }, navArgument("flockId") { type = NavType.StringType })) { ProductionHistoryScreen(navController) }
+        composable(Screen.ProductionNew.route, arguments = listOf(navArgument("farmId") { type = NavType.StringType }, navArgument("flockId") { type = NavType.StringType })) { ProductionEditorScreen(navController) }
+        composable(Screen.ProductionDetail.route, arguments = listOf(navArgument("farmId") { type = NavType.StringType }, navArgument("flockId") { type = NavType.StringType }, navArgument("productionId") { type = NavType.StringType })) { ProductionDetailScreen(navController) }
+        composable(Screen.ProductionEdit.route, arguments = listOf(navArgument("farmId") { type = NavType.StringType }, navArgument("flockId") { type = NavType.StringType }, navArgument("productionId") { type = NavType.StringType })) { ProductionEditorScreen(navController) }
         composable(Screen.Dashboard.route) {
             DashboardScreen(navController = navController)
         }
