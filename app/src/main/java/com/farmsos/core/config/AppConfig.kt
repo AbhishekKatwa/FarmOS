@@ -31,4 +31,9 @@ object AppConfig {
     const val ENABLE_OFFLINE_MODE = true
     const val ENABLE_BACKGROUND_SYNC = true
     const val ENABLE_PUSH_NOTIFICATIONS = true
+
+    // Supabase Configuration
+    // These should ideally be provided via BuildConfig or a secure properties file
+    const val SUPABASE_URL = "https://your-project-id.supabase.co"
+    const val SUPABASE_ANON_KEY = "your-anon-key"
 }
