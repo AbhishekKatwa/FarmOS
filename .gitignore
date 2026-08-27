@@ -1,0 +1,36 @@
+cat > .gitignore <<'EOF'
+# Android / Gradle
+.gradle/
+build/
+**/build/
+
+# Android Studio / IntelliJ
+.idea/
+*.iml
+*.iws
+*.ipr
+
+# Local configuration
+local.properties
+
+# macOS
+.DS_Store
+
+# Claude local settings
+.claude/
+
+# APK / build outputs
+*.apk
+*.aab
+
+# Generated files
+captures/
+.externalNativeBuild/
+.cxx/
+
+# Kotlin
+.kotlin/
+
+# Logs
+*.log
+EOF
