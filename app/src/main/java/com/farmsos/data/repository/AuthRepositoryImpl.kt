@@ -49,7 +49,18 @@ class AuthRepositoryImpl @Inject constructor(
             val userInfo = auth.currentUserOrNull()
                 ?: error("Login succeeded but no session was established")
             resolveUser(userInfo)
-        }.onFailure { logger.e("Login failed: ${it.message}", it) }
+        }.onFailure { 
+            logger.e("Login failed: ${it.message}", it)
+        }.recoverCatching { error ->
+            val message = when {
+                error.message?.contains("Invalid login credentials", ignoreCase = true) == true -> 
+                    "Invalid credentials. If you just signed up, please check your email for a confirmation link."
+                error.message?.contains("Email not confirmed", ignoreCase = true) == true ->
+                    "Please confirm your email address before logging in."
+                else -> error.message ?: "Network error or invalid credentials."
+            }
+            throw Exception(message)
+        }
     }
 
     override suspend fun signUp(name: String, email: String, password: String): Result<User> {
@@ -61,10 +72,19 @@ class AuthRepositoryImpl @Inject constructor(
             }
             val userInfo = auth.currentUserOrNull() ?: created
             if (userInfo == null) {
-                error("Account created. Confirm your email before signing in.")
+                throw Exception("Account created. Please confirm your email before signing in.")
             }
             resolveUser(userInfo)
-        }.onFailure { logger.e("Sign-up failed: ${it.message}", it) }
+        }.onFailure { 
+            logger.e("Sign-up failed: ${it.message}", it)
+        }.recoverCatching { error ->
+            val message = when {
+                error.message?.contains("rate limit", ignoreCase = true) == true ->
+                    "Too many attempts. Please wait a few minutes or disable 'Confirm Email' in Supabase Settings."
+                else -> error.message ?: "Sign-up failed. Ensure your email is valid."
+            }
+            throw Exception(message)
+        }
     }
 
     override suspend fun logout(): Result<Unit> {

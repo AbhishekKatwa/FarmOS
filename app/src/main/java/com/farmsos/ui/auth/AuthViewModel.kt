@@ -25,7 +25,13 @@ class AuthViewModel @Inject constructor(
 
     init {
         viewModelScope.launch {
-            authUseCases.restoreSession()
+            try {
+                authUseCases.restoreSession()
+            } catch (e: Exception) {
+                // Ignore session restoration errors
+            }
+        }
+        viewModelScope.launch {
             authUseCases.observeAuthState().collect { state ->
                 _authState.value = state
             }

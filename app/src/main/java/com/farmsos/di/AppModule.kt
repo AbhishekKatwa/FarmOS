@@ -8,6 +8,9 @@ import com.farmsos.core.network.NetworkManager
 import com.farmsos.domain.repository.UserRepository
 import com.farmsos.data.local.FarmDatabase
 import com.farmsos.data.local.UserDatabase
+import com.farmsos.data.local.FarmDao
+import com.farmsos.data.local.OperationalDao
+import com.farmsos.data.local.UserDao
 import com.farmsos.data.repository.UserRepositoryImpl
 import dagger.Module
 import dagger.Provides
@@ -68,5 +71,23 @@ class AppModule {
         logger: AppLogger
     ): UserRepository {
         return UserRepositoryImpl(apiClient, userDatabase, logger)
+    }
+
+    @Provides
+    @Singleton
+    fun provideFarmDao(database: FarmDatabase): FarmDao {
+        return database.farmDao()
+    }
+
+    @Provides
+    @Singleton
+    fun provideOperationalDao(database: FarmDatabase): OperationalDao {
+        return database.operationalDao()
+    }
+
+    @Provides
+    @Singleton
+    fun provideUserDao(database: UserDatabase): UserDao {
+        return database.userDao()
     }
 }
